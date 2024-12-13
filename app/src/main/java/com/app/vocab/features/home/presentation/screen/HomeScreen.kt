@@ -28,10 +28,10 @@ import com.app.vocab.features.home.presentation.components.CameraPreview
 import com.app.vocab.features.home.presentation.components.RationaleDialog
 import com.app.vocab.features.home.presentation.components.SettingsDialog
 import com.app.vocab.features.home.presentation.utils.Utils.openAppSettings
+import com.app.vocab.features.home.presentation.utils.handlePermissionRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -39,6 +39,27 @@ fun HomeScreen(
     innerPadding: PaddingValues,
     onBackOrFinish: () -> Unit
 ) {
+    val context = LocalContext.current
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var showRationaleDialog by remember { mutableStateOf(false) }
+    var hasRequestedPermission by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!cameraPermissionState.status.isGranted) {
+            handlePermissionRequest(
+                cameraPermissionState = cameraPermissionState,
+                hasRequested = hasRequestedPermission,
+                onHasRequested = {
+                    hasRequestedPermission = it
+                },
+                onResult = { rationale, settings ->
+                    showRationaleDialog = rationale
+                    showSettingsDialog = settings
+                }
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -50,37 +71,11 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val context = LocalContext.current
-        val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
-        var showSettingsDialog by remember { mutableStateOf(false) }
-        var showRationaleDialog by remember { mutableStateOf(false) }
-
-        LaunchedEffect(cameraPermissionState.status) {
-            when {
-                !cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale -> {
-                    showSettingsDialog = true
-                }
-
-                !cameraPermissionState.status.isGranted && cameraPermissionState.status.shouldShowRationale -> {
-                    showRationaleDialog = true
-                }
-            }
-        }
-
         when {
             cameraPermissionState.status.isGranted -> {
                 CameraPreview(onImageCaptured = { imageUri ->
                     Toast.makeText(context, "Image saved at $imageUri", Toast.LENGTH_SHORT).show()
                 })
-            }
-
-            showSettingsDialog -> {
-                SettingsDialog(
-                    onDismiss = { showSettingsDialog = false },
-                    onOpenSettings = {
-                        context.openAppSettings()
-                    }
-                )
             }
 
             showRationaleDialog -> {
@@ -93,13 +88,33 @@ fun HomeScreen(
                 )
             }
 
+            showSettingsDialog -> {
+                SettingsDialog(
+                    onDismiss = { showSettingsDialog = false },
+                    onOpenSettings = {
+                        context.openAppSettings()
+                    }
+                )
+            }
+
             else -> {
                 PermissionRequiredText(
                     onRequestPermission = {
-                        if (!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
-                            showSettingsDialog = true
-                        } else
+                        if (!cameraPermissionState.status.isGranted) {
+                            handlePermissionRequest(
+                                cameraPermissionState = cameraPermissionState,
+                                hasRequested = hasRequestedPermission,
+                                onHasRequested = {
+                                    hasRequestedPermission = it
+                                },
+                                onResult = { rationale, settings ->
+                                    showRationaleDialog = rationale
+                                    showSettingsDialog = settings
+                                }
+                            )
+                        } else {
                             cameraPermissionState.launchPermissionRequest()
+                        }
                     }
                 )
             }

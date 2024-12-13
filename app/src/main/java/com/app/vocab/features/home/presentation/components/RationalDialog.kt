@@ -13,7 +13,7 @@ fun RationaleDialog(onDismiss: () -> Unit, onRequestPermission: () -> Unit) {
         text = { Text("Camera permission is required to use this feature. Please grant permission.") },
         confirmButton = {
             TextButton(onClick = onRequestPermission) {
-                Text("Try Again")
+                Text("Allow")
             }
         },
         dismissButton = {
