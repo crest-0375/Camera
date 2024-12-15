@@ -1,9 +1,10 @@
 package com.app.vocab.features.auth.domain.state
 
+import android.net.Uri
 
-sealed class AuthState {
-    data object Idle : AuthState()
-    data object Loading : AuthState()
-    data class Success(val message: String) : AuthState()
-    data class Error(val error: String) : AuthState()
+sealed class SaveImageState {
+    data object Idle : SaveImageState()
+    data object Loading : SaveImageState()
+    data class Success(val uri: Uri) : SaveImageState()
+    data class Error(val error: String) : SaveImageState()
 }

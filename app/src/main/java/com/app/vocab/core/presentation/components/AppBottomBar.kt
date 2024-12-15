@@ -6,14 +6,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.NavigationRailItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,15 +34,6 @@ fun AppBottomBar(
             val isSelected = currentRoute == item.appRoute.name
 
             NavigationRailItem(
-                colors = NavigationRailItemColors(
-                    selectedIndicatorColor = Color.Transparent,
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    disabledIconColor = MaterialTheme.colorScheme.tertiary,
-                    disabledTextColor = MaterialTheme.colorScheme.tertiary
-                ),
                 selected = isSelected,
                 onClick = {
                     if (!isSelected) {
@@ -68,7 +56,7 @@ fun AppBottomBar(
                 },
                 icon = {
                     Icon(
-                        painter = painterResource(id = item.icon),
+                        imageVector = if (isSelected) item.selectedIcon else item.unSelectedIcon,
                         contentDescription = item.title,
                         tint = if (isSelected) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.tertiary,

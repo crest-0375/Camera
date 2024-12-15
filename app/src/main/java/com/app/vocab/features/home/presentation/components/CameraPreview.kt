@@ -1,10 +1,9 @@
 package com.app.vocab.features.home.presentation.components
 
-import android.net.Uri
-import android.widget.Toast
+import android.graphics.Bitmap
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -24,10 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import java.io.File
 
 @Composable
-fun CameraPreview(onImageCaptured: (Uri) -> Unit) {
+fun CameraPreview(captureImage: (Bitmap) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
@@ -51,7 +49,7 @@ fun CameraPreview(onImageCaptured: (Uri) -> Unit) {
                     imageCapture
                 )
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("CameraPreview", "Failed to show CameraPreview")
             }
         }, ContextCompat.getMainExecutor(context))
     }
@@ -63,20 +61,10 @@ fun CameraPreview(onImageCaptured: (Uri) -> Unit) {
     ) {
         Button(
             onClick = {
-                val outputOptions = ImageCapture.OutputFileOptions.Builder(
-                    File(context.cacheDir, "captured_image.jpg")
-                ).build()
-                imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(context),
-                    object : ImageCapture.OnImageSavedCallback {
-                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            onImageCaptured(outputFileResults.savedUri ?: Uri.EMPTY)
-                        }
-
-                        override fun onError(exception: ImageCaptureException) {
-                            Toast.makeText(context, "Failed to capture image", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    })
+                previewView.bitmap?.let { captureImage(it) }
+                previewView.bitmap ?: {
+                    Log.e("CameraPreview", "CameraPreview: Failed to get Bitmap")
+                }
             },
             modifier = Modifier
                 .padding(16.dp)
