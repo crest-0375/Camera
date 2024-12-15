@@ -116,7 +116,7 @@ class AuthViewModel @Inject constructor(
                 val result = authRepository.signOut()
                 _authState.value = result.fold(
                     onSuccess = { AuthState.Success(it) },
-                    onFailure = { AuthState.Error(it.message ?: "Unknown error occurred") }
+                    onFailure = { AuthState.Error(it.message ?: "Sign out failed") }
                 )
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Unknown error occurred")

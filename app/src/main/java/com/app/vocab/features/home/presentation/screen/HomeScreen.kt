@@ -1,6 +1,5 @@
 package com.app.vocab.features.home.presentation.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,11 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.vocab.features.home.domain.state.SaveImageState
 import com.app.vocab.features.home.presentation.components.CameraPreview
 import com.app.vocab.features.home.presentation.components.RationaleDialog
 import com.app.vocab.features.home.presentation.components.SettingsDialog
 import com.app.vocab.features.home.presentation.utils.Utils.openAppSettings
 import com.app.vocab.features.home.presentation.utils.handlePermissionRequest
+import com.app.vocab.features.home.presentation.viewmodel.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -37,8 +40,11 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun HomeScreen(
     innerPadding: PaddingValues,
-    onBackOrFinish: () -> Unit
+    moveToImageScreen: (String) -> Unit,
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
+    val saveImageState by homeViewModel.saveImageState.collectAsState()
+
     val context = LocalContext.current
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     var showSettingsDialog by remember { mutableStateOf(false) }
@@ -61,6 +67,13 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(saveImageState) {
+        if (saveImageState is SaveImageState.Success) {
+            moveToImageScreen((saveImageState as SaveImageState.Success).uri.toString())
+            homeViewModel.resetSate()
+        }
+    }
+
     Column(
         modifier = Modifier
             .padding(innerPadding)
@@ -73,9 +86,7 @@ fun HomeScreen(
     ) {
         when {
             cameraPermissionState.status.isGranted -> {
-                CameraPreview(onImageCaptured = { imageUri ->
-                    Toast.makeText(context, "Image saved at $imageUri", Toast.LENGTH_SHORT).show()
-                })
+                CameraPreview(captureImage = { homeViewModel.saveImage(it) })
             }
 
             showRationaleDialog -> {

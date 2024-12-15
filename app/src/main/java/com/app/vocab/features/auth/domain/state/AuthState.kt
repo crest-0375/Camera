@@ -1,6 +1,5 @@
 package com.app.vocab.features.auth.domain.state
 
-
 sealed class AuthState {
     data object Idle : AuthState()
     data object Loading : AuthState()

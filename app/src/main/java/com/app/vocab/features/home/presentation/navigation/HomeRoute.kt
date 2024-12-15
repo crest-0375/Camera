@@ -8,4 +8,7 @@ sealed class HomeRoute {
 
     @Serializable
     data object HomeScreen : HomeRoute()
+
+    @Serializable
+    data class SavedImageScreen(val uri: String) : HomeRoute()
 }
