@@ -5,4 +5,5 @@ import android.net.Uri
 
 interface HomeRepository {
     suspend fun saveImage(bitmap: Bitmap): Result<Uri>
+    suspend fun saveImageToStorage(uri: Uri): Result<String>
 }

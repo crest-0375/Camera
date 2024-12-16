@@ -20,8 +20,9 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signIn(user: User): Result<String> {
         return try {
-            firebaseAuth.signInWithEmailAndPassword(user.email, user.password).await()
-            Result.success("Sign in was successful")
+            val result = firebaseAuth.signInWithEmailAndPassword(user.email, user.password).await()
+            if (result.user != null) Result.success("Sign in was successful")
+            else Result.failure(Exception("Sign in failed"))
         } catch (e: FirebaseAuthException) {
             Result.failure(Exception(e.message ?: "Sign in failed"))
         } catch (e: Exception) {
@@ -31,8 +32,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signUp(user: User): Result<String> {
         return try {
-            firebaseAuth.createUserWithEmailAndPassword(user.email, user.password).await()
-            Result.success("Sign up was successful")
+            val result =
+                firebaseAuth.createUserWithEmailAndPassword(user.email, user.password).await()
+            if (result.user != null) Result.success("Sign up was successful")
+            else Result.failure(Exception("Sign up failed"))
         } catch (e: FirebaseAuthException) {
             Result.failure(Exception(e.message ?: "Sign up failed"))
         } catch (e: Exception) {

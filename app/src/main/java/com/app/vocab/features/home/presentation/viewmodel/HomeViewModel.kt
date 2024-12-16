@@ -1,6 +1,7 @@
 package com.app.vocab.features.home.presentation.viewmodel
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,7 +29,7 @@ init {
             try {
                 val result = homeRepository.saveImage(bitmap)
                 _saveImageState.value = result.fold(
-                    onSuccess = { SaveImageState.Success(it) },
+                    onSuccess = { SaveImageState.Success(it.toString()) },
                     onFailure = { SaveImageState.Error("Failed to save image") }
                 )
             } catch (e: Exception) {
@@ -39,5 +40,20 @@ init {
 
     fun resetSate() {
         _saveImageState.value = SaveImageState.Idle
+    }
+
+    fun saveImageToStorage(uri: Uri) {
+        viewModelScope.launch {
+            _saveImageState.value = SaveImageState.Loading
+            try {
+                val result = homeRepository.saveImageToStorage(uri)
+                _saveImageState.value = result.fold(
+                    onSuccess = { SaveImageState.Success(it) },
+                    onFailure = { SaveImageState.Error("Failed to save image in Firebase") }
+                )
+            } catch (e: Exception) {
+                _saveImageState.value = SaveImageState.Error("Unknown error occurred")
+            }
+        }
     }
 }

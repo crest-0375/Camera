@@ -6,6 +6,7 @@ import com.app.vocab.features.auth.domain.repository.AuthRepository
 import com.app.vocab.features.home.data.HomeRepositoryImpl
 import com.app.vocab.features.home.domain.repository.HomeRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.StorageReference
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,6 +27,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideHomeRepository(
-        @ApplicationContext context: Context
-    ): HomeRepository = HomeRepositoryImpl(context)
+        @ApplicationContext context: Context,
+        storageReference: StorageReference
+    ): HomeRepository = HomeRepositoryImpl(context, storageReference)
 }

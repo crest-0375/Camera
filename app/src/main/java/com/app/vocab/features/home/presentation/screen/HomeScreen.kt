@@ -69,7 +69,7 @@ fun HomeScreen(
 
     LaunchedEffect(saveImageState) {
         if (saveImageState is SaveImageState.Success) {
-            moveToImageScreen((saveImageState as SaveImageState.Success).uri.toString())
+            moveToImageScreen((saveImageState as SaveImageState.Success).uri)
             homeViewModel.resetSate()
         }
     }
@@ -82,7 +82,7 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState())
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Bottom
     ) {
         when {
             cameraPermissionState.status.isGranted -> {
